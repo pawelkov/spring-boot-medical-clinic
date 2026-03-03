@@ -2,6 +2,7 @@ package pl.pawkowal.medicalclinic.patient.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 import pl.pawkowal.medicalclinic.patient.api.PatientDto;
 import pl.pawkowal.medicalclinic.patient.domain.Patient;
 import pl.pawkowal.medicalclinic.patient.infrastructure.PatientRepository;
@@ -33,7 +34,7 @@ public class PatientService {
     @Transactional(readOnly = true)
     public Patient getById(Long id) {
         return patientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +42,7 @@ public class PatientService {
 
     public Patient update(Long id, PatientDto dto) {
         Patient existing = patientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + id));
 
         existing.update(
                 dto.firstName(),
@@ -56,7 +57,7 @@ public class PatientService {
 
     public void delete(Long id) {
         Patient patient = patientRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + id));
         patientRepository.delete(patient);
     }
 }

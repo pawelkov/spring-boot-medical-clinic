@@ -1,6 +1,7 @@
 package pl.pawkowal.medicalclinic.address.api;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.pawkowal.medicalclinic.address.application.AddressService;
 
@@ -26,6 +27,7 @@ public class AddressController {
     public AddressDto getById(@PathVariable Long id) { return mapper.toDto(addressService.getById(id)); }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public AddressDto create(@Valid @RequestBody AddressDto dto) {
         return mapper.toDto(addressService.create(dto));
     }
@@ -36,6 +38,7 @@ public class AddressController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) { addressService.delete(id); }
 
 }

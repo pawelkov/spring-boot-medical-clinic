@@ -2,6 +2,7 @@ package pl.pawkowal.medicalclinic.doctor.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 import pl.pawkowal.medicalclinic.doctor.domain.Doctor;
 import pl.pawkowal.medicalclinic.doctor.infrastructure.DoctorRepository;
 import pl.pawkowal.medicalclinic.address.domain.Address;
@@ -25,7 +26,7 @@ public class DoctorService {
 
     public Doctor create(DoctorDto dto) {
         Address address = addressRepository.findById(dto.addressId())
-                .orElseThrow(() -> new IllegalArgumentException("Address not found: " + dto.addressId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + dto.addressId()));
 
         Doctor doctor = new Doctor(
                 address,
@@ -41,7 +42,7 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public Doctor getById(Long id) {
         return doctorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -49,10 +50,10 @@ public class DoctorService {
 
     public Doctor update(Long id, DoctorDto dto) {
         Doctor existing = doctorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found: " + id));
 
         Address address = addressRepository.findById(dto.addressId())
-                .orElseThrow(() -> new IllegalArgumentException("Address not found: " + dto.addressId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + dto.addressId()));
 
         existing.update(
                 address,
@@ -67,7 +68,7 @@ public class DoctorService {
 
     public void delete(Long id) {
         Doctor doctor = doctorRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found: " + id));
         doctorRepository.delete(doctor);
     }
 }

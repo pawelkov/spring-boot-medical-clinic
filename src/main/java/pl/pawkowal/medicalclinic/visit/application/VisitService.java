@@ -2,6 +2,7 @@ package pl.pawkowal.medicalclinic.visit.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 import pl.pawkowal.medicalclinic.doctor.domain.Doctor;
 import pl.pawkowal.medicalclinic.doctor.infrastructure.DoctorRepository;
 import pl.pawkowal.medicalclinic.patient.domain.Patient;
@@ -30,10 +31,10 @@ public class VisitService {
 
     public Visit create(VisitDto dto) {
         Patient patient = patientRepository.findById(dto.patientId())
-                .orElseThrow(() -> new IllegalArgumentException("Patient not found: " + dto.patientId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Patient not found: " + dto.patientId()));
 
         Doctor doctor = doctorRepository.findById(dto.doctorId())
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + dto.doctorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found: " + dto.doctorId()));
 
         Visit visit = new Visit(
                 patient,
@@ -49,7 +50,7 @@ public class VisitService {
     @Transactional(readOnly = true)
     public Visit getById(Long id) {
         return visitRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -57,10 +58,10 @@ public class VisitService {
 
     public Visit update(Long id, VisitDto dto) {
         Visit existing = visitRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + id));
 
         Doctor doctor = doctorRepository.findById(dto.doctorId())
-                .orElseThrow(() -> new IllegalArgumentException("Doctor not found: " + dto.doctorId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found: " + dto.doctorId()));
 
         existing.update(
                 doctor,
@@ -74,7 +75,7 @@ public class VisitService {
 
     public void delete(Long id) {
         Visit visit = visitRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + id));
         visitRepository.delete(visit);
     }
 }

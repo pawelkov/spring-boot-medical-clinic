@@ -1,6 +1,7 @@
 package pl.pawkowal.medicalclinic.visit.api;
 
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import pl.pawkowal.medicalclinic.visit.application.VisitService;
 
@@ -26,6 +27,7 @@ public class VisitController {
     public VisitDto getById(@PathVariable Long id) { return mapper.toDto(visitService.getById(id)); }
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public VisitDto create(@Valid @RequestBody VisitDto dto) {
         return mapper.toDto(visitService.create(dto));
     }
@@ -36,6 +38,7 @@ public class VisitController {
     }
 
     @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) { visitService.delete(id); }
 
 }

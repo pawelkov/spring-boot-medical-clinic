@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pl.pawkowal.medicalclinic.address.api.AddressDto;
 import pl.pawkowal.medicalclinic.address.domain.Address;
 import pl.pawkowal.medicalclinic.address.infrastructure.AddressRepository;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -32,7 +33,7 @@ public class AddressService {
     @Transactional(readOnly = true)
     public Address getById(Long id) {
         return addressRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Address not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -40,7 +41,7 @@ public class AddressService {
 
     public Address update(Long id, AddressDto dto) {
         Address existing = addressRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Address not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + id));
 
         existing.update(
                 dto.city(),
@@ -54,7 +55,7 @@ public class AddressService {
 
     public void delete(Long id) {
         Address address = addressRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Address not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + id));
         addressRepository.delete(address);
     }
 }

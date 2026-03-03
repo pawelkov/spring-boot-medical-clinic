@@ -2,6 +2,7 @@ package pl.pawkowal.medicalclinic.medicalTreatment.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 import pl.pawkowal.medicalclinic.medicalTreatment.api.MedicalTreatmentDto;
 import pl.pawkowal.medicalclinic.medicalTreatment.domain.MedicalTreatment;
 import pl.pawkowal.medicalclinic.medicalTreatment.infrastructure.MedicalTreatmentRepository;
@@ -25,7 +26,7 @@ public class MedicalTreatmentService {
 
     public MedicalTreatment create(MedicalTreatmentDto dto) {
         Visit visit = visitRepository.findById(dto.visitId())
-                .orElseThrow(() -> new IllegalArgumentException("Visit not found: " + dto.visitId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Visit not found: " + dto.visitId()));
 
         MedicalTreatment medicalTreatment = new MedicalTreatment(
                 visit,
@@ -39,7 +40,7 @@ public class MedicalTreatmentService {
     @Transactional(readOnly = true)
     public MedicalTreatment getById(Long id) {
         return medicalTreatmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Medical Treatment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Treatment not found: " + id));
     }
 
     @Transactional(readOnly = true)
@@ -47,7 +48,7 @@ public class MedicalTreatmentService {
 
     public MedicalTreatment update(Long id, MedicalTreatmentDto dto) {
         MedicalTreatment existing = medicalTreatmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Medical Treatment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Treatment not found: " + id));
 
         existing.update(
                 dto.treatmentType(),
@@ -59,7 +60,7 @@ public class MedicalTreatmentService {
 
     public void delete(Long id) {
         MedicalTreatment medicalTreatment = medicalTreatmentRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Medical Treatment not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Medical Treatment not found: " + id));
         medicalTreatmentRepository.delete(medicalTreatment);
     }
 }

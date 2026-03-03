@@ -5,8 +5,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import pl.pawkowal.medicalclinic.common.api.GlobalExceptionHandler;
+import pl.pawkowal.medicalclinic.common.exception.ResourceNotFoundException;
 import pl.pawkowal.medicalclinic.visit.application.VisitService;
 import pl.pawkowal.medicalclinic.visit.domain.Visit;
 import pl.pawkowal.medicalclinic.visit.domain.VisitStatus;
@@ -22,6 +25,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.mockito.Mockito.mock;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@Import(GlobalExceptionHandler.class)
 @WebMvcTest(VisitController.class)
 public class VisitControllerTest {
 
@@ -67,7 +71,7 @@ public class VisitControllerTest {
         mockMvc.perform(post("/v1/visits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
+                .andExpect(status().isCreated())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.patientId").value(1))
@@ -157,7 +161,12 @@ public class VisitControllerTest {
         mockMvc.perform(post("/v1/visits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.path").value("/v1/visits"))
+                .andExpect(jsonPath("$.validationErrors.patientId").exists());
     }
 
     @Test
@@ -174,6 +183,53 @@ public class VisitControllerTest {
         mockMvc.perform(post("/v1/visits")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.path").value("/v1/visits"))
+                .andExpect(jsonPath("$.validationErrors.cost").exists());
+    }
+
+    @Test
+    void shouldReturn404WhenVisitNotFound_onGetById() throws Exception {
+        // given
+        Long visitId = 999L;
+        when(visitService.getById(visitId))
+                .thenThrow(new ResourceNotFoundException("Visit not found: " + visitId));
+
+        // when + then
+        mockMvc.perform(get("/v1/visits/{id}", visitId))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Visit not found: 999"))
+                .andExpect(jsonPath("$.path").value("/v1/visits/999"));
+    }
+
+    @Test
+    void shouldReturn404WhenPatientNotFound_onCreate() throws Exception {
+        // given
+        VisitDto request = new VisitDto(
+                null,
+                999L,
+                1L,
+                LocalDateTime.of(2026, 2, 10, 10, 0),
+                new BigDecimal("250.00"),
+                VisitStatus.SCHEDULED
+        );
+
+        when(visitService.create(any()))
+                .thenThrow(new ResourceNotFoundException("Patient not found: 999"));
+
+        // when + then
+        mockMvc.perform(post("/v1/visits")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(404))
+                .andExpect(jsonPath("$.message").value("Patient not found: 999"))
+                .andExpect(jsonPath("$.path").value("/v1/visits"));
     }
 }
